@@ -1,5 +1,5 @@
 public class demo {
 
-public  integer z ;
+public  integer y ;
 
 }
