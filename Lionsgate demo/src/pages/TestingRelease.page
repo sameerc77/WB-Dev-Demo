@@ -1,0 +1,183 @@
+<apex:page controller="AddReleaseWindowDetailsCntrl" showHeader="false" applyHtmlTag="true" applyBodyTag="true">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+          <meta http-equiv="x-ua-compatible" content="ie=edge"></meta>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"></meta>
+          <apex:stylesheet value="{!URLFOR($Resource.SLDS0122, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+          <apex:includeScript value="{!URLFOR($Resource.CRM_Resource_Library, 'js/jquery.min.js')}" />
+          <apex:includeScript value="{!URLFOR($Resource.CRM_Resource_Library, 'js/angular.min.js')}" />
+          
+        </head>
+        <style>
+            .slds-text-heading--label{
+                background-color: #3570AF !important;
+                color: #EAEFF6 !important;
+            }
+        </style>
+        <script>
+            angular.module("AddReleaseWindow",[])
+            .controller("AddReleaseWindowController", ['$scope', function($scope) {
+                    $scope.text ="ABC";
+                    $scope.tableOptions = {
+                            colHeaders : false,
+                            items : []
+                     };
+                    $scope.arrReleaseRecord = [{}];
+                    $scope.getPicklistValue = function(objectame,fieldAPIName){
+                        AddReleaseWindowDetailsCntrl.getPicklistValues(objectame,fieldAPIName,
+                                function(result, event){
+                                    if(result != null && result.length > 0){
+                                        $scope.distributionType = result;
+                                        $scope.$apply();
+                                    }
+                                },{escape: true});
+
+                    }//End
+                    
+                    $scope.getReleaseType = function(){
+                         AddReleaseWindowDetailsCntrl.getReleaseTypes(function(result, event){
+                                    if(result != null && result.length > 0){
+                                        $scope.releaseTypes = result;
+                                        $scope.releaseType = result[0];
+                                        $scope.$apply();
+                                    }
+                               },{escape: false});
+
+                    }//End
+                    $scope.addRelease = function(){
+                        if(($scope.arrReleaseRecord[ $scope.arrReleaseRecord.length - 1] && $scope.arrReleaseRecord[ $scope.arrReleaseRecord.length - 1].Name) || $scope.arrReleaseRecord.length == 0)
+                            $scope.arrReleaseRecord.push(new Object());
+                        else
+                            alert('Fill last row value.');
+                    }//End
+                    
+                    $scope.removeRelease = function(iIndex){
+                        $scope.arrReleaseRecord.splice(iIndex, 1); 
+                    }//End
+                    
+                    $scope.saveRecord = function(){
+                        var objTemplate = {
+                            	Name: $scope.releaseType,
+                                Release_Type__c: $scope.releaseType,
+                                sObjectType: 'Template__c'
+                            };
+                        $scope.lstRelease = [];
+                        for(var iIndex= 0; iIndex < $scope.arrReleaseRecord.length; iIndex++){
+                            if($scope.arrReleaseRecord[iIndex].Name){
+                                var obj = {
+                                    Name: $scope.arrReleaseRecord[iIndex].Name,
+                                    Active__c : $scope.arrReleaseRecord[iIndex].Active__c,
+                                    Distribution_Type__c: $scope.arrReleaseRecord[iIndex].Distribution_Type__c,
+                                    Duration__c:$scope.arrReleaseRecord[iIndex].Duration__c,
+                                    Start_Months__c: $scope.arrReleaseRecord[iIndex].Start_Months__c,
+                                    Template__c: '',
+                                    sObjectType: 'Release_Window_Details__c'
+                                }
+                            	$scope.lstRelease.push(obj);  
+                            }
+                        }
+                        AddReleaseWindowDetailsCntrl.saveRecord(objTemplate,$scope.lstRelease,function(result, event){
+                            if(result != null)
+                                window.open("/"+result,"_self");      
+                            else
+                                alert('Unsuccess!!')
+                        	},{escape: false});
+                    }//End
+                }]);    
+        </script>
+        <body ng-app="AddReleaseWindow" ng-controller="AddReleaseWindowController" ng-init="getPicklistValue('Release_Window_Details__c','Distribution_Type__c'); getReleaseType();">
+           <div class="slds">
+               <div class="slds-grid">
+                   <div class="slds-col slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--6-of-12">
+                       <div class="slds-card">
+                           <div class="slds-card__header slds-grid">
+                               <div class="slds-media slds-media--center slds-has-flexi-truncate">
+                                   <div class="slds-media__body">
+                                       <h2 class="slds-text-heading--small slds-truncate">Template</h2>
+                                   </div>
+                               </div>
+                           </div>
+                           <div class="slds-card__body slds-form--horizontal" style="text-align: center;">
+                               <div class="slds-form-element">
+                                  <label class="slds-form-element__label" style= "font-size: 14px;" for="selectSample1">Release Type</label>
+                                  <div class="slds-form-element__control">
+                                    <div class="slds-select_container">
+                                        <select class="slds-select" ng-model="releaseType" ng-options="o as o for o in releaseTypes"/>  
+                                     </div>
+                                  </div>
+                                </div>
+                           </div>
+                       </div>
+               		</div>
+               </div>
+               
+               <div class="slds-card">
+                  <div class="slds-card__header slds-grid">
+                    <div class="slds-media slds-media--center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                            <h2 class="slds-text-heading--small slds-truncate">Release Window Details</h2>
+                        </div>
+                    </div>
+                   </div>
+                    <div class="slds-card__body">
+                      <table class="slds-table slds-table--bordered" id="releaseWindow">
+                          <thead>
+                            <tr class="slds-text-heading--label">
+                              <th scope="col">
+                                  <span class="slds-truncate">Release Window Details Name</span>
+                               </th>
+                               <th scope="col">
+                                   <span class="slds-truncate">Active</span>
+                               </th>
+                               <th scope="col">
+                                   <span class="slds-truncate">Distribution Type</span>
+                               </th>
+                               <th scope="col">
+                                   <span class="slds-truncate">Start Months</span>
+                               </th>
+                               <th scope="col">
+                                   <span class="slds-truncate">Duration</span>
+                               </th>
+                                <th scope="col">
+                                   <span class="slds-truncate">Action</span>
+                               </th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                          <tr class="slds-hint-parent" ng-repeat="releaseRecord in arrReleaseRecord">
+                            <td class="slds-truncate">
+                                <input type="text" class="slds-input" ng-model="releaseRecord.Name"/>  
+                            </td>
+                            <td class="slds-truncate">
+                                <input type="checkbox" ng-model="releaseRecord.Active__c"/>  
+                            </td>
+                            <td class="slds-truncate">
+                                <select class="slds-select" ng-model="releaseRecord.Distribution_Type__c" ng-options="o as o for o in distributionType"/>  
+                            </td>
+                            <td class="slds-truncate">
+                                <input type="number" class="slds-input" ng-model="releaseRecord.Start_Months__c" min="0" max="12"/>  
+                            </td>
+                            <td class="slds-truncate">
+                                <input type="number" class="slds-input" ng-model="releaseRecord.Duration__c" min="0"/>  
+                            </td>
+                             <td>
+                                <a title="Remove Release Window Detail" ng-click="removeRelease($index)">
+                                    <svg aria-hidden="true" class="slds-icon icon__svg slds-icon-action-close slds-icon--small" data-reactid=".e.0.0.0.1.0"><use xlink:href="{!URLFOR($Resource.SLDS0122,'/assets/icons/action-sprite/svg/symbols.svg#close')}"></use></svg>
+                                </a>
+                             </td>
+                          </tr>
+                         </tbody>
+                      </table>
+                    </div>
+                   <div class="slds-card__footer">
+                       <a ng-click="addRelease();" title="Add Release Window Detail Row">
+                          <svg aria-hidden="true" class="slds-icon icon__svg slds-icon-action-new slds-icon--small"><use xlink:href="{!URLFOR($Resource.SLDS0122,'/assets/icons/action-sprite/svg/symbols.svg#new')}"></use></svg>
+                       </a>
+                       <button class="slds-button slds-button--brand" style="margin-left: 93%;" ng-click="saveRecord()">Save</button>
+                   </div>
+                   
+               </div>
+            </div> 
+        </body>
+    </html>
+</apex:page>

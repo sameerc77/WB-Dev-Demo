@@ -1,0 +1,149 @@
+<apex:page controller="SearchTitle" standardStylesheets="false" sidebar="false">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+            <meta http-equiv="x-ua-compatible" content="ie=edge"></meta>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"></meta>
+            <apex:stylesheet value="{!URLFOR($Resource.SLDS0122, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+            <apex:includeScript value="{!URLFOR($Resource.CRM_Resource_Library, 'js/jquery.min.js')}" />
+            <apex:includeScript value="{!URLFOR($Resource.CRM_Resource_Library, 'js/angular.min.js')}" />
+            <style>
+                .paddingDiv {
+                    padding: 21px;
+                }
+                .tableHeader {
+                	background-color: #3570AF !important;
+                	color: #EAEFF6 !important;
+                }
+                .headerLabel{
+                	color: #EAEFF6 !important;
+                }
+            </style>
+            <script>
+                var app = angular.module('searchTitleApp',[]);
+                app.controller('searchTitleController',['$scope',function($scope){
+                    //$scope.arrTitleRecord = [{checked: false}]
+                    $scope.search = function(){
+                        if($scope.titleName || $scope.dx || $scope.origLang){
+                            var strQuery = 'Select Id, Name, Producer__c, Director__c, Rls_Year__c, Rating__c From Title__c';
+                            strQuery += ($scope.titleName || $scope.dx || $scope.origLang) ? ' Where ': '';
+                            strQuery += ($scope.titleName)? 'Name Like \'%'+$scope.titleName+'%\'': '';
+                            strQuery += ($scope.dx)? ' OR Dx__c ='+$scope.dx: '';
+                            strQuery += ($scope.origLang)? ' OR Orig_Lang__c = \''+$scope.origLang+'\'': '';
+                            SearchTitle.getRecords(strQuery,function(result, event){
+                                if(result != null){
+                                	$scope.arrTitleRecord = result;
+                                    $scope.$apply();
+                                }},{escape: false});
+                       }else{
+                            alert('Fill alteast one field...');
+                       }
+                    }//End
+                    
+                    $scope.arrTitleId = [];
+                    $scope.edit = function(){
+                    	angular.forEach($scope.arrTitleRecord, function(title){
+                            var iIndex = $scope.arrTitleId.map(function (title) {return title;}).indexOf(title.Id);
+                            if (!!title.checked){
+                                if(iIndex == -1) $scope.arrTitleId.push(title.Id);
+                            }else{
+                                if(iIndex != -1) $scope.arrTitleId.splice(iIndex, 1); 
+                            }
+                         })
+                        alert($scope.arrTitleId);
+                    }//End
+                    
+                }])
+            </script>
+    
+        </head>
+        <body ng-app="searchTitleApp" ng-controller="searchTitleController">
+            <div class="slds">
+                <div class="slds-page-header" role="banner">
+                    <div class="slds-grid">
+                        <nav class="slds-col slds-size--1-of-1 slds-text-heading--medium">Release Schedule Management</nav>
+                    </div>
+                    <div class="slds-grid slds-p-top--small">
+                        <div class="slds-col slds-size--1-of-2 slds-medium-size--1-of-1 slds-large-size--3-of-12">
+                            <div class="slds-form--stacked">
+                                <div class="slds-form-element slds-p-right--small">
+                                    <label class="slds-form-element__label">Name</label>
+                                    <div class="slds-form-element__control">
+                                        <input id="name" class="slds-input slds-input--small" type="text" ng-model="titleName"/>
+                                    </div>
+                                </div>
+                            </div>    
+                        </div>
+                        <div class="slds-col slds-size--1-of-2 slds-medium-size--1-of-1 slds-large-size--3-of-12">
+                            <div class="slds-form--stacked">
+                                <div class="slds-form-element slds-p-right--small">
+                                    <label class="slds-form-element__label">Dx</label>
+                                    <div class="slds-form-element__control">
+                                        <input id="dx" class="slds-input slds-input--small" type="text" ng-model="dx"/>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="slds-col slds-size--1-of-2 slds-medium-size--1-of-1 slds-large-size--3-of-12">
+                            <div class="slds-form--stacked">
+                                <div class="slds-form-element slds-p-right--small">
+                                    <label class="slds-form-element__label">Orig Lang</label>
+                                    <div class="slds-form-element__control">
+                                        <input id="origLang" class="slds-input slds-input--small" type="text" ng-model="origLang"/>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="slds-col slds-size--1-of-2 slds-medium-size--1-of-1 slds-large-size--3-of-12 paddingDiv">
+                            <button class="slds-button slds-button--brand slds-button--small" ng-click="search();">Search</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-card">
+                	<div class="slds-card__header slds-grid">
+                        <div class="slds-grid">
+                        	<nav class="slds-col slds-size--1-of-1 slds-text-heading--medium">Titles</nav>
+                    	</div>
+                    </div>
+                    <div class="slds-card__body">
+                        <table class="slds-table slds-table--bordered slds-max-medium-table--stacked-horizontal slds-no-row-hover">
+                            <thead>
+                                <tr class="tableHeader">
+                                    <th class="slds-row-action" scope="col">
+                                        Action
+                                    </th>
+                                    <th class="slds-text-heading--label slds-size--1-of-5 headerLabel" scope="col">Tittle Name</th>
+                                    <th class="slds-text-heading--label slds-size--1-of-5 headerLabel" scope="col">Producer</th>
+                                    <th class="slds-text-heading--label slds-size--1-of-5 headerLabel" scope="col">Director</th>
+                                    <th class="slds-text-heading--label slds-size--1-of-5 headerLabel" scope="col">Rls Year</th>
+                                    <th class="slds-text-heading--label slds-size--1-of-5 headerLabel" scope="col">Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="slds-hint-parent" ng-repeat="titleRecord in arrTitleRecord">
+                                    <td>
+                                        <input name="checkbox" type="checkbox" id="check_{{titleRecord.Id}}" ng-model="titleRecord.checked" ng-checked="checked(titleRecord.Id)" />
+                                    </td>
+                                    <td class="slds-size--1-of-5" data-label="Tittle Name">{{titleRecord.Name}}</td>
+                                    <td class="slds-size--1-of-5" data-label="Producer">
+                                        <div>
+                                            {{titleRecord.Producer__c}}
+                                        </div>
+                                    </td>
+                                    <td class="slds-size--1-of-5" data-label="Director">{{titleRecord.Director__c}}</td>
+                                    <td class="slds-size--1-of-5" data-label="Rls Year">{{titleRecord.Rls_Year__c}}</td>
+                                    <td class="slds-size--1-of-5" data-label="Rating">{{titleRecord.Rating__c}}</td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="slds-card__footer">
+                        <span ng-show="(!arrTitleRecord) || arrTitleRecord.length == 0">No Records.</span>
+                        <button class="slds-button slds-button--brand slds-button--small" style="margin-left: 89%;" ng-click="edit();">Apply Template</button>
+                    </div>
+                </div>
+                
+            </div>
+        </body>
+    </html>
+</apex:page>

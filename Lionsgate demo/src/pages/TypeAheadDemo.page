@@ -1,0 +1,118 @@
+<apex:page showHeader="false" sidebar="false">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+<apex:includeScript value="{!URLFOR($Resource.CRM_Resource_Library, 'js/angular.min.js')}" />
+<!--<apex:stylesheet value="{!URLFOR($Resource.BootStrap3, 'bootstrap-3.1.1-dist/css/bootstrap.min.css')}"/>-->
+
+<div ng-app="app1">
+        <div class="well-lg well">
+            <h1>  Welcome to Release Schedule Management  </h1>
+        </div>
+    <div ng-controller="ItemCtrl" class="container"> 
+
+        Please Search Your Title Here : <div class="form-group" style="width:200px;">
+                                    <typeahead
+                                       title="TitleName" subtitle="BillingCity"
+                                       displaykey="TitleName" retkey="AccId"
+                                       modelret="valRet" modeldisplay="valDis"
+                                       />
+                         </div> <br />
+                        <b> Value Selected</b>  {{valDis}}  <br /> 
+                        <!--<b> Selected Id (Hidden) </b> {{valRet}}-->
+    </div>
+</div>
+
+<script>
+
+var myApp = angular.module('app1',[]); 
+
+ myApp.controller('ItemCtrl', ['$scope','$templateCache','$http',  function($scope,$templateCache,$http) {
+
+ }]);
+
+   myApp.directive('typeahead', function($timeout,$http) {
+  return {
+    restrict: 'AEC',
+    scope: {
+      title: '@',
+      retkey: '@',
+      displaykey:'@',
+      modeldisplay:'=',
+      subtitle: '@',
+      modelret: '='
+    },
+
+    link: function(scope, elem, attrs) {
+        scope.current = 0;
+        scope.selected = false; 
+
+      scope.da  = function(txt){
+          scope.ajaxClass = 'loadImage';
+          $http({method: 'Get', url: 'Account_JSON?TitleName='+txt}).
+                success(function(data, status) {
+                  scope.TypeAheadData = data;
+                  scope.ajaxClass = '';
+                }) ;  
+
+      }
+
+      scope.handleSelection = function(key,val) {
+        scope.modelret = key;
+        scope.modeldisplay = val;
+        scope.current = 0;
+        scope.selected = true;
+      }
+
+      scope.isCurrent = function(index) {
+        return scope.current == index;
+      }
+
+      scope.setCurrent = function(index) {
+        scope.current = index;
+      }
+
+    },
+    template: '<input type="text" class="form-control" ng-model="modeldisplay" ng-KeyPress="da(modeldisplay)"  ng-keydown="selected=false"'+
+                'style="width:100%;" ng-class="ajaxClass">'+
+                '<div class="list-group table-condensed overlap" ng-hide="!modeldisplay.length || selected" style="width:100%">'+
+                    '<a href="javascript:void();" class="list-group-item noTopBottomPad" ng-repeat="item in TypeAheadData|filter:model  track by $index" '+
+                       'ng-click="handleSelection(item[retkey],item[displaykey])" style="cursor:pointer" '+
+                       'ng-class="{active:isCurrent($index)}" '+
+                       'ng-mouseenter="setCurrent($index)">'+
+                         ' {{item[title]}}<br />'+
+                         '<i>{{item[subtitle]}} </i>'+
+                    '</a> '+
+                '</div>'+
+                '</input>'
+  };
+});
+
+</script>
+    <!--
+<style>
+     .noTopBottomPad
+            {
+                padding-top : 2px !important;
+                padding-bottom : 2px !important;
+            }
+        .overlap {position: absolute !important;
+                z-index: 900 !important; width: inherit  !important ;}
+        .loadImage { background: white url('{!URLFOR($Resource.AutoCompleteWithModal, 'AjaxLoad.gif')}') right center no-repeat; }
+
+</style> -->
+    <style>
+    .displayNone { 
+        display:none; 
+    }
+    .displayBlock {
+        display:block;
+    }
+    .ui-autocomplete-loading { 
+        background: white url(/img/loading32.gif) right center no-repeat;
+        background-size:15px 15px; 
+    }
+    .placeHolder {
+        font-style: italic;
+    }
+</style>
+    
+</apex:page>

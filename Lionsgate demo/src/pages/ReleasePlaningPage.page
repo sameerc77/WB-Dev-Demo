@@ -1,0 +1,81 @@
+<apex:page controller="ReleasePlaningPageController" sidebar="false" >
+<apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
+   
+    <apex:form >
+        <apex:pageMessages />
+        <apex:pageBlock title="Titles" id="details">     
+            <apex:pageblockSection title="Choose Titles">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Title" for="Title"/>
+                    <apex:inputText value="{!inputTitle}" id="titlename"/>
+                </apex:pageBlockSectionItem>
+                <!--<apex:pageBlockSectionItem >
+                    <apex:outputLabel value="DX " for="type"/>
+                    <apex:inputText value="{!type}" id="type"/>
+                </apex:pageBlockSectionItem>-->
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="TV Grade " for="Categories"/>
+                    <apex:selectList value="{!Categories}" multiselect="false" size="1">
+                        <apex:selectOptions value="{!CategoriesOptions}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>   
+            </apex:pageblockSection>
+            <br/>
+            <center>
+            <apex:outputpanel id="counter">
+
+                <apex:commandButton value="Search" action="{!createTable}" reRender="recMatch, recNotMatch,recAllNoMatch, AllContact"/>
+                <apex:actionSupport event="onclick" action="{!createTable}" rerender="counter" status="loading"/>
+
+                </apex:outputpanel>
+            </center>
+            <br/>
+            <apex:actionstatus id="loading">
+                     <apex:facet name="start">Please Wait... <img src="/img/loading.gif"/></apex:facet>
+            </apex:actionstatus>
+              <apex:pageblockSection title="Title Records" id="Buttn">
+                <apex:outputPanel id="recMatch" layout="">
+                    <apex:pageblockSectionItem rendered="{!Match}">
+                            <apex:pageblockTable value="{!TitleRec}" var="Title" columns="8">
+                                
+                                <apex:column headerValue="{!$ObjectType.Title__c.fields.Name.label}" >
+                                    <apex:outputLink value="/{!Title.Id}" target="_blank">{!Title.Name}</apex:outputLink>
+                                </apex:column>
+                                
+                                <apex:column value="{!Title.Dx__c}" style=""/>
+                                <apex:column value="{!Title.TV_Grade__c}"/>
+                                <apex:column value="{!Title.Director__c}"/>
+                                <apex:column value="{!Title.Producer__c}"/>
+                                <apex:column value="{!Title.Rating__c}"/>
+                                <apex:column value="{!Title.Writer__c}"/>
+                            </apex:pageblockTable>
+                            
+                        </apex:pageblockSectionItem>
+                </apex:outputPanel>
+                <center>
+                    <apex:outputPanel id="recAllNoMatch" >
+                        <apex:pageblockSectionItem rendered="{!AllMatch}">
+                          <apex:pageblockTable value="{!TitleRec}" var="Title">
+                                
+                                 <apex:column headerValue="{!$ObjectType.Title__c.fields.Name.label}">
+                                    <apex:outputLink value="/{!Title.Id}" target="_blank">{!Title.Name}</apex:outputLink>
+                                </apex:column>
+                                
+                                <apex:column value="{!Title.Dx__c}"/>
+                                <apex:column value="{!Title.TV_Grade__c}"/>
+                                <apex:column value="{!Title.Director__c}"/>
+                                <apex:column value="{!Title.Producer__c}"/>
+                                <apex:column value="{!Title.Rating__c}"/>
+                                <apex:column value="{!Title.Writer__c}"/>
+                            </apex:pageblockTable>
+                        </apex:pageblockSectionItem>
+                    </apex:outputPanel>
+                </center>
+                <apex:outputPanel id="recNotMatch">
+                    <apex:pageBlockSectionItem rendered="{!NoMatch}">Please Enter Other Criteria !</apex:pageBlockSectionItem>
+                </apex:outputPanel>
+            </apex:pageblockSection>
+             </apex:pageBlock>
+
+    </apex:form>
+</apex:page>

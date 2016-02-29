@@ -1,0 +1,71 @@
+<apex:page controller="AddReleaseWindowDetailsCntrl" showHeader="false" applyHtmlTag="true" applyBodyTag="true">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+        <meta http-equiv="x-ua-compatible" content="ie=edge"></meta>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"></meta>
+          <apex:stylesheet value="{!URLFOR($Resource.SLDS0122, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+          <apex:stylesheet value="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.19.0/handsontable.full.min.css" />
+       
+    	  <apex:includeScript value="{!URLFOR($Resource.CRM_Resource_Library, 'js/jquery.min.js')}" />
+          <apex:includeScript value="{!URLFOR($Resource.CRM_Resource_Library, 'js/angular.min.js')}" />
+          <apex:includeScript value="{!URLFOR($Resource.CRM_Resource_Library, 'js/handsontable.full.js')}" />
+          <apex:includeScript value="https://rawgit.com/handsontable/ngHandsontable/master/dist/ngHandsontable.min.js" /> 
+        </head>
+		<script>
+			var test = ['A','B']; 
+			angular.module("AddReleaseWindow",['ngHandsontable'])
+            .controller("AddReleaseWindowController", ['$scope', function($scope) {
+                    $scope.text ="ABC";
+                    $scope.tableOptions = {
+                            colHeaders : false,
+                            items : []
+                     };
+                	$scope.getPicklistValue = function(objectame,fieldAPIName){
+                		AddReleaseWindowDetailsCntrl.getPicklistValues(objectame,fieldAPIName,
+                            	function(result, event){
+                                    if(result != null && result.length > 0){
+                                        debugger;
+                                    	$scope.distributionType = result;
+                                        $scope.$apply();
+                                    }
+                                },{escape: true});
+
+                	}//End
+                }]);    
+		</script>
+		<body ng-app="AddReleaseWindow" ng-controller="AddReleaseWindowController" ng-init="getPicklistValue('Release_Window_Details__c','Distribution_Type__c')">
+           <div class="slds">
+               <div class="slds-page-header" role="banner">
+                    <div class="slds-grid">
+                    </div>
+               </div>
+               <div class="slds-card">
+                  <div class="slds-card__header slds-grid">
+                    <div class="slds-media slds-media--center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                            <h2 class="slds-text-heading--small slds-truncate">Release Window Details</h2>
+                        </div>
+                    </div>
+                   </div>
+                    <div class="slds-card__body">
+                       <hot-table settings="{colHeaders: colHeaders}"
+                                  row-headers="false"
+                                  min-spare-rows="1"
+                                  datarows="items"
+                                  height="300"
+                                  width="700">
+                           <hot-column data="id" title="'ID'"></hot-column>
+                           <hot-column data="relWinDetail.Name" title="'Release Window Details Name'" ></hot-column>
+                           <hot-column data="relWinDetail.Active__c" title="'Active'" type="'checkbox'" checked-template="'Yes'" unchecked-template="'No'"></hot-column>
+                           <hot-column data="relWinDetail.Distribution_Type__c" title="'Favorite food'" type="'dropdown'" source="['A','B']">
+                           </hot-column>
+                           <hot-column data="relWinDetail.Distribution_Type__c" title="'Favorite food'" type="'autocomplete'">
+                                <hot-autocomplete datarows="description in distributionType"></hot-autocomplete>
+                            </hot-column>
+                       </hot-table>  
+                    </div>
+               </div>
+            </div> 
+		</body>
+	</html>
+</apex:page>

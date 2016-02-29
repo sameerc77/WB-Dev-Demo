@@ -1,0 +1,82 @@
+<apex:page controller="AddReleaseWindowDetails" sidebar="false">
+	<apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
+    <Script>
+    $(document).ready(function () {
+        $(".test").each(function () {
+        var $self = $(this);
+        $self.data("previous_value", $self.val());
+        });
+    
+    $(".test").live('change',function () {
+        var $self = $(this);
+        var prev_value = $self.data("previous_value");
+        var cur_value = $self.val();
+        
+        $(".test").not($self).find("option").filter(function () {
+            return $(this).val() == prev_value;
+        }).prop("disabled", false);
+        
+        if (cur_value != "") {
+            $(".test").not($self).find("option").filter(function () {
+                return $(this).val() == cur_value;
+            }).prop("disabled", true);
+            
+            $self.data("previous_value", cur_value);
+        }
+    });
+});
+    </Script>
+    <apex:form >
+        
+      <apex:pageBlock title="Template">
+          <apex:pageBlockSection columns="1">
+              <apex:selectList value="{!releaseType}" size="1" label="Release Type">
+            	<apex:selectOptions value="{!releaseTypes}"/>
+              </apex:selectList>
+              <!--<apex:commandButton value="Save Template" action="{!createTemplate}"/>-->
+          </apex:pageBlockSection>
+      </apex:pageBlock>
+        <apex:pageBlock title="Release Window Details" id="relWindow">
+            <apex:pageMessages />
+            <apex:variable var="rowNumber" value="{!0}"/>
+            <apex:pageblockSection columns="1">
+                <apex:pageBlockTable title="Release Window Details" var="acc" value="{!ReleaseWindowDetailsList}"> 
+                    <apex:column headerValue="No." style="width:20px; text-align:center;" headerClass="centertext">
+                        <apex:outputText value="{0}" style="text-align:center;"> 
+                            <apex:param value="{!rowNumber+1}" /> 
+                        </apex:outputText>
+                    </apex:column> 
+                    <apex:column headerValue="Release Window Details Name" >
+                        <apex:inputField value="{!acc.Name}"/>
+                    </apex:column> 
+                    <apex:column headerValue="Active" >
+                        <apex:inputField value="{!acc.Active__c}"/>
+                    </apex:column> 
+                    <apex:column headerValue="Distribution Type" >
+                        <apex:inputField value="{!acc.Distribution_Type__c}" id="test" styleClass="test"/>
+                    </apex:column> 
+                    <apex:column headerValue="Start Months" >
+                        <apex:inputField value="{!acc.Start_Months__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="Duration" >
+                        <apex:inputField value="{!acc.Duration__c}"/>
+                    </apex:column>
+                    <!--<apex:column headerValue="Template" >
+							<apex:inputField value="{!acc.Template__c}"/>
+						</apex:column>-->
+                    <apex:column headerValue="Action" >
+                        <apex:commandButton value="Delete" action="{!deleteRow}" reRender="relWindow">
+                            <apex:param name="rowIndex" value="{!rowNumber}"/>
+                        </apex:commandButton>
+                        <apex:variable var="rowNumber" value="{!rowNumber+1}"/>
+                    </apex:column> 
+                </apex:pageBlockTable>
+                <apex:commandButton action="{!addRow}" value="Add Release Window Details" reRender="relWindow"/>
+            </apex:pageblockSection>
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Save" action="{!crtTemplteWithRelWindowDetail}"/>
+                <!--<apex:commandButton value="Cancel" action="{!cancel}"/>-->
+            </apex:pageBlockButtons>
+        </apex:pageBlock>	
+	</apex:form> 
+ </apex:page>
